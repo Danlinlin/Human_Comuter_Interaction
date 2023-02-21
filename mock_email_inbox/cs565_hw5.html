@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="description" content="Homework for CS 565 at Oregon State University">
+	<meta name="author" content="Minsuk Kahng and WRITE_DOWN_YOUR_NAME">
+	
+	<title>CS 565 HW 5</title>
+
+	<script src="https://unpkg.com/vue@3"></script>
+
+	<!-- This is for drawing the star icon. -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+	<style type="text/css">
+		html, body {
+			font-family: Arial;
+			font-size: 14px;
+		}
+		#app {
+			display: flex;
+			width: 1120px;
+		}
+		#email-list {
+			width: 600px;
+		}
+		table{
+			width:100%;
+			table-layout:fixed;
+		}
+		table, tr{
+			border: 0.01px solid rgb(203, 203, 203);
+			border-collapse: collapse;
+			border-right: none;
+			border-left: none;
+		}
+		td, #starred{
+			height: 25px;
+		}
+		.email-from{
+			width: 30%;
+		}
+		.email-date{
+			text-align: right;
+			width: 25%;
+		}
+		.email-title{
+			color: #5179ba;
+			width: 40%;
+			cursor: pointer;
+		}
+		.selected-email {
+			width: 500px;
+			margin-left: 20px;
+		}
+		.fa-star {
+			color: #eee;
+			margin-top: 15px;
+			margin-left: 5px;
+			width: 60px;
+			cursor: pointer;
+		}
+		tr:hover{
+			background-color: rgb(203, 203, 203);
+		}
+		.selected-email{
+			border: 2px solid rgb(203, 203, 203);
+			border-radius: 5px;
+		}
+		.etitle{
+			margin-top: 20px;
+			margin-left: 20px;
+			font-size: 23px;
+			font-weight: bold;
+		}
+		.efrom{
+			width: 200px;
+			margin-top: 10px;
+			margin-left: 20px;
+			color: grey;
+		}
+		.edate{
+			margin-top: -15px;
+			float: right;
+			margin-right: 20px;
+			color: grey;
+		}
+		.econtent{
+			padding: 25px;
+		}
+		.selected{
+			background-color: rgb(192, 219, 234)
+		}
+		hr,.leftTitle{
+			width: 460px;
+			color:gray
+		}
+		#starrb ,#starred{
+			color: yellow;
+		}
+		#starr, #starrb{
+			float:right;
+			margin-top: 30px;
+			margin-right: -25px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app">
+		<!-- list of emails on the left -->
+		<div id="email-list">
+			<div class="leftTitle">{{emails.length}} emails ({{starCount}} starred)</div>
+			<table>
+				<tr class = "email"  v-for="(item,index) in emails" :key="index" :class="{selected:index==selectedIndex}">
+					<td class="fa fa-star"  @click="starredEmail(item.id)" v-if="star[item.id]==0"></td>
+					<td class="fa fa-star"  @click="starredEmail(item.id)" v-if="star[item.id]==1" id="starred"></td>
+					<td class = "email-from">{{item.from}}</td>
+					<td class = "email-title" @click="showContent(index)">{{item.title}}</td>
+					<td class = "email-date">{{item.date}}</td>
+				</tr>
+			</table>
+		</div>
+
+		<!-- selected email on the right -->
+		<div class="selected-email" v-show="isShow" v-for="item in array">
+			<i class="fa fa-star" id="starr" v-if="star[item.id]==0" @click="starredEmail(item.id)"></i>
+			<i class="fa fa-star" id="starrb" v-else @click="starredEmail(item.id)"></i>
+			<div class="etitle">{{item.title}}</div><hr>
+			<div class="efrom">{{item.from}}</div>
+			<div class="edate">{{item.date}}</div><hr>
+			<div class="econtent" v-html="item.content"></div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		const { createApp } = Vue;
+
+		const app = createApp({
+			data() {
+				return {
+					emails: [],
+					selectedIndex:null,
+					isShow:false,
+					array:[],
+					starCount:0,
+					star:new Array(1000).fill(0)
+				}
+			},
+			
+			methods: {
+				// You need to implement methods here.
+				showContent(index){
+					this.array=[]
+					this.selectedIndex = index
+					this.isShow=true
+					this.array.push(this.emails[index])
+				},
+				starredEmail(index){
+					if (this.star[index]==1){
+						this.starCount = this.starCount - 1
+					}
+					else{
+						this.starCount = this.starCount + 1
+					}
+					this.star[index] = !this.star[index]
+				}
+			},
+
+			// The following code is for loading the JSON data file and storing them into "emails".
+			beforeMount() {
+				fetch("cs565_hw5_email_data.json")
+					.then(response => response.json())
+					.then(jsonData => {
+						this.emails = jsonData.emails;
+						console.log("The list of emails has been loaded:", this.emails);
+					});
+			}
+		});
+
+		app.mount("#app");
+
+	</script>
+</body>
+</html>
